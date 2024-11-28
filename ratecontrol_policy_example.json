@@ -1,0 +1,115 @@
+{
+"name": "Policy for Rate Control",
+  "policy_type_id":21003,
+  "description":"This policy is associated with rate control. Entities which support this policy type must accept the following policy inputs (see the payload for more specifics) : class, which represents the class of traffic for which the policy is being enforced",
+
+  "create_schema":{
+      "$schema":"http://json-schema.org/draft-07/schema#",
+      "type":"object",
+      "additionalProperties":false,
+      "required":["class"],
+      "properties":{
+          "class":{
+              "type":"integer",
+              "minimum":1,
+              "maximum":256,
+              "description":"integer id representing class to which we are applying policy"
+          },
+          "enforce":{
+              "type":"boolean",
+              "description": "Whether to enable or disable enforcement of policy on this class"
+          },
+          "window_length":{
+              "type":"integer",
+              "minimum":15,
+              "maximum":300,
+              "description":"Sliding window length in seconds"
+          },
+          "trigger_threshold":{
+              "type":"integer",
+              "minimum":1
+          },
+          "blocking_rate":{
+              "type":"number",
+              "minimum":0,
+              "maximum":100
+          }
+
+      }
+  },
+
+  "downstream_schema":{
+      "type":"object",
+      "additionalProperties":false,
+      "required":["policy_type_id", "policy_instance_id", "operation"],
+      "properties":{
+          "policy_type_id":{
+              "type":"integer",
+              "enum":[21000]
+          },
+          "policy_instance_id":{
+              "type":"string"
+          },
+          "operation":{
+              "type":"string",
+              "enum":["CREATE", "UPDATE", "DELETE"]
+          },
+          "payload":{
+              "$schema":"http://json-schema.org/draft-07/schema#",
+              "type":"object",
+              "additionalProperties":false,
+              "required":["class"],
+              "properties":{
+                  "class":{
+                      "type":"integer",
+                      "minimum":1,
+                      "maximum":256,
+                      "description":"integer id representing class to which we are applying policy"
+                  },
+                  "enforce":{
+                      "type":"boolean",
+                      "description": "Whether to enable or disable enforcement of policy on this class"
+                  },
+                  "window_length":{
+                      "type":"integer",
+                      "minimum":15,
+                      "maximum":300,
+                      "description":"Sliding window length in seconds"
+                  },
+                  "trigger_threshold":{
+                      "type":"integer",
+                      "minimum":1
+                  },
+                  "blocking_rate":{
+                      "type":"number",
+                      "minimum":0,
+                      "maximum":100
+                  }
+
+
+              }
+          }
+      }
+  },
+  "notify_schema":{
+      "type":"object",
+      "additionalProperties":false,
+      "required":["policy_type_id", "policy_instance_id", "handler_id", "status"],
+      "properties":{
+          "policy_type_id":{
+              "type":"integer",
+              "enum":[21000]
+          },
+          "policy_instance_id":{
+              "type":"string"
+          },
+          "handler_id":{
+              "type":"string"
+          },
+          "status":{
+              "type":"string",
+              "enum":["OK", "ERROR", "DELETED"]
+          }
+      }
+  }
+}
