@@ -21,19 +21,19 @@ run xApp:
 ```
 
 ## Supported API calls
-| **Method** | **Endpoint**                                                | **Description**                |
+ | **Method** | **Endpoint**                                                | **Description**                |
 |------------|-------------------------------------------------------------|--------------------------------|
-| GET        | /a1-p/policytypes                                           | Get All Policy Types          |
-| GET        | /a1-p/policytypes/{policy_type_id}                          | Get Policy Type               |
-| PUT        | /a1-p/policytypes/{policy_type_id}                          | Create Policy Type            |
-| DELETE     | /a1-p/policytypes/{policy_type_id}                          | Delete Policy Type            |
-| PUT        | /a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id} | Create Policy Instance        |
-| DELETE     | /a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id} | Delete Policy Instance        |
-| GET        | /a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status | Get Policy Instance Status    |
-| GET        | /a1-p/policytypes/{policy_type_id}/policies                 | List Policy Instances         |
+| GET        | /a1-p/policytypes                                           | List Policy Types          |
+| GET        | /a1-p/policytypes/(policy_type_id)                          | Get Policy Type               |
+| PUT        | /a1-p/policytypes/(policy_type_id)                         | Create Policy Type            |
+| DELETE     | /a1-p/policytypes/(policy_type_id)                         | Delete Policy Type            |
+| GET        | /a1-p/policytypes/(policy_type_id)/policies                 | List Policy Instances         |
+| PUT        | /a1-p/policytypes/(policy_type_id)/policies/(policy_instance_id) | Create Policy Instance        |
+| DELETE     | /a1-p/policytypes/(policy_type_id)/policies/(policy_instance_id) | Delete Policy Instance        |
+| GET        | /a1-p/policytypes/(policy_type_id)/policies/(policy_instance_id)/status | Get Policy Instance Status    |
 
 
 
 ## Contributers
-- Jerzy Jegier, Orange Innovation Poland, jerzy.jegier@orange.com
+- Jerzy Jegier, Orange Innovation Poland
 - [Kamil Kociszewski](https://www.linkedin.com/in/kociszz/), Orange Innovation Poland, kamil.kociszewski@orange.com
