@@ -1,2 +1,0 @@
-add_subdirectory(dec_asn)
-add_subdirectory(dec_asn_kpm_common)
