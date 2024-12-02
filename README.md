@@ -10,8 +10,8 @@ type in browser: (host_ip):9000/docs #to see available APIs
 ```
 
 ## Run test xApp with FlexRIC
+use FlexRIC build from here: [FlexRIC](https://gitlab.eurecom.fr/Kociszz/flexric-a1-xapp/-/tree/A1_integration_RIC_TaaP?ref_type=heads)
 ```
-use local FlexRIC build
 build FlexRIC following repo instructions
 run RIC with: 
 ./flexric-a1-xapp-A1_integration_RIC_TaaP/build/examples/ric/nearRT-RIC
