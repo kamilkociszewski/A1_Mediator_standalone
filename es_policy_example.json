@@ -1,0 +1,204 @@
+{
+  "name": "ORAN_EnergySaving_2.0.0",
+  "description": "See \"Use case 8: Network Energy saving Use Cases \" in Non-RT RIC & A1 interface: Use Cases and Requirements [1].",
+  "policy_type_id": 10001,
+  "create_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.o-ran.org/jsonschemas/a1td/oran_energysaving_2.0.0",
+    "description": "O-RAN standard Energy saving policy",
+    "type": "object",
+    "properties": {
+      "scope": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "cellId": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellId"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "cellId"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cellIdList": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellIdList"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "cellIdList"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "taIList": {
+                "$ref": "/a1td/common_1.0.0#/$defs/TaIList"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "taIList"
+            ]
+          }
+        ]
+      },
+      "esObjectives": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "targetPeeEnergy": {
+                "type": "integer"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "targetPeeEnergy"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "esPercentage": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "esPercentage"
+            ]
+          }
+        ]
+      },
+      "esResources": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/EsResource"
+        },
+        "minItems": 1
+      }
+    },
+    "additionalProperties": false,
+    "anyOf": [
+      {
+        "required": [
+          "scope",
+          "esObjectives"
+        ]
+      },
+      {
+        "required": [
+          "scope",
+          "esResources"
+        ]
+      }
+    ],
+    "$defs": {
+      "AvoidanceType": {
+        "type": "string",
+        "enum": [
+          "AVOID",
+          "FORBID"
+        ]
+      },
+      "EsResource": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "operationalCells": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellIdList"
+              },
+              "operationalPreference": {
+                "$ref": "#/$defs/AvoidanceType"
+              },
+              "prbTotalDl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "prbTotalUl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "operationalCells",
+              "operationalPreference"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "coverageCells": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellIdList"
+              },
+              "coveragePreference": {
+                "$ref": "#/$defs/AvoidanceType"
+              },
+              "prbTotalDl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "prbTotalUl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "coverageCells",
+              "coveragePreference"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "operationalCells": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellIdList"
+              },
+              "operationalPreference": {
+                "$ref": "#/$defs/AvoidanceType"
+              },
+              "coverageCells": {
+                "$ref": "/a1td/common_1.0.0#/$defs/CellIdList"
+              },
+              "coveragePreference": {
+                "$ref": "#/$defs/AvoidanceType"
+              },
+              "prbTotalDl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "prbTotalUl": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "operationalCells",
+              "operationalPreference",
+              "coverageCells",
+              "coveragePreference"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
