@@ -36,7 +36,7 @@ class PolicyTypeSchema(BaseModel):
     create_schema: CreateSchema = None
 
 class PolicyInstanceSchema(BaseModel):
-    data: Dict[str, Any]  # Dynamic fields to match policy type properties
+    data: Dict[str, Any]  # Accepts dynamic fields for policy instances
 
     @model_validator(mode="before")
     def validate_instance_fields(cls, values, info):
@@ -91,13 +91,36 @@ async def create_policy_type(policy_type_id: int = Path(..., gt=0, lt=2147483647
 
 
 @app.put("/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}", response_model=PolicyInstanceSchema)
-async def create_policy_instance(policy_type_id: int, policy_instance_id: str, body: PolicyInstanceSchema = Body(...)):
+async def create_policy_instance(
+    policy_type_id: int,
+    policy_instance_id: str,
+    body: PolicyInstanceSchema = Body(...),
+):
+    # Check if policy type exists
     if policy_type_id not in policy_types:
         raise HTTPException(status_code=404, detail="Policy type does not exist")
 
-    # Store the instance under the policy type
+    # Fetch the policy type's schema
+    policy_type = policy_types[policy_type_id]
+    schema_properties = policy_type.create_schema.properties
+
+    # Validate each field in the instance against the schema
+    for field_name, field_value in body.data.items():
+        if field_name not in schema_properties:
+            raise HTTPException(status_code=400, detail=f"Field '{field_name}' is not allowed for this policy type")
+        expected_type = schema_properties[field_name]["type"]
+        if expected_type == "integer" and not isinstance(field_value, int):
+            raise HTTPException(status_code=400, detail=f"Field '{field_name}' must be an integer")
+        if expected_type == "bool" and not isinstance(field_value, bool):
+            raise HTTPException(status_code=400, detail=f"Field '{field_name}' must be a boolean")
+
+    # Save the instance under the policy type
+    if policy_type_id not in policy_instances:
+        policy_instances[policy_type_id] = {}
     policy_instances[policy_type_id][policy_instance_id] = body
+
     return body
+
 
 @app.get("/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status", response_model=PolicyInstanceSchema)
 async def get_policy_instance_status(policy_type_id: int, policy_instance_id: str):
