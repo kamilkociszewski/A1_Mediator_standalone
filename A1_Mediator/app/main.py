@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional
 from fastapi import FastAPI, HTTPException, Path, Body
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator  # Updated import for Pydantic V2
 
 app = FastAPI()
 
@@ -15,12 +15,12 @@ app.add_middleware(
 )
 
 class CreateSchema(BaseModel):
-    schema: Optional[str] = Field(alias="$schema", default="http://json-schema.org/draft-07/schema#")
+    schema_: Optional[str] = Field(alias="$schema", default="http://json-schema.org/draft-07/schema#")  # Avoid shadowing
     type: str = "object"
     properties: Dict[str, Dict[str, Any]] = Field(default_factory=dict)  # Allows dynamic properties
     additionalProperties: bool = False
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def validate_properties(cls, values):
         """Ensure all properties are of types integer or bool."""
         properties = values.get("properties", {})
@@ -107,4 +107,5 @@ async def delete_policy_instance(policy_type_id: int, policy_instance_id: str):
     return {"detail": "Policy instance successfully deleted"}
 
 if __name__ == "__main__":
+    import uvicorn  # Ensure import is included
     uvicorn.run(app, host="0.0.0.0", port=9000)
