@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 
 from pathlib import Path as OsPath
 
@@ -8,11 +8,11 @@ from fastapi import FastAPI, HTTPException, Path, Body
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import api
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
-# Add CORS middleware
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -22,11 +22,34 @@ app.add_middleware(
     allow_headers=["*"],  # Allow custom headers like Content-Type
 )
 
+
+class CellID(BaseModel):
+    type: str = "integer"
+    default: int = 0
+
+
+class EsState(BaseModel):
+    type: str = "bool"
+    default: bool = False
+
+
+class Properties(BaseModel):
+    cellID: CellID = None
+    ES_State: EsState = None
+
+
+class CreateSchema(BaseModel):
+    schema: Optional[str] = Field(alias="$schema", default="http://json-schema.org/draft-07/schema#")
+    type: str = "object"
+    properties: Properties = None
+    additionalProperties: bool = False
+
+
 class PolicyTypeSchema(BaseModel):
     name: str
     description: str
-    policy_type_id: int
-    create_schema: dict
+    policy_type_id: int = 10000
+    create_schema: CreateSchema = None
 
 
 class PolicyInstanceSchema(BaseModel):
