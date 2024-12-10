@@ -38,31 +38,6 @@ class PolicyTypeSchema(BaseModel):
 class PolicyInstanceSchema(BaseModel):
     data: Dict[str, Any]  # Accepts dynamic fields for policy instances
 
-    @model_validator(mode="before")
-    def validate_instance_fields(cls, values, info):
-        """Validate that fields in the instance match the policy type schema."""
-        policy_type_id = info.context.get("policy_type_id")  # Provided in request
-        if policy_type_id is None:
-            raise ValueError("Policy type ID is required for validation.")
-
-        # Fetch the policy type's schema
-        policy_type = policy_types.get(policy_type_id)
-        if not policy_type:
-            raise ValueError(f"Policy type {policy_type_id} does not exist.")
-
-        schema_properties = policy_type.create_schema.properties
-
-        # Validate each field in the instance
-        for field_name, field_value in values["data"].items():
-            if field_name not in schema_properties:
-                raise ValueError(f"Field '{field_name}' is not allowed for this policy type.")
-            expected_type = schema_properties[field_name]["type"]
-            if expected_type == "integer" and not isinstance(field_value, int):
-                raise ValueError(f"Field '{field_name}' must be an integer.")
-            if expected_type == "bool" and not isinstance(field_value, bool):
-                raise ValueError(f"Field '{field_name}' must be a boolean.")
-        return values
-
 policy_types = {}
 policy_instances = {}
 
@@ -115,22 +90,20 @@ async def create_policy_instance(
             raise HTTPException(status_code=400, detail=f"Field '{field_name}' must be a boolean")
 
     # Save the instance under the policy type
-    if policy_type_id not in policy_instances:
-        policy_instances[policy_type_id] = {}
     policy_instances[policy_type_id][policy_instance_id] = body
 
     return body
 
 
-@app.get("/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status", response_model=PolicyInstanceSchema)
+@app.get("/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status")
 async def get_policy_instance_status(policy_type_id: int, policy_instance_id: str):
-    if policy_type_id in policy_types:
-        if policy_instance_id in policy_instances[policy_type_id]:
-            return policy_instances[policy_type_id][policy_instance_id]
-        else:
-            raise HTTPException(status_code=400, detail="Policy instance does not exist")
-    else:
-        raise HTTPException(status_code=400, detail="Policy type does not exist")
+    if policy_type_id not in policy_types:
+        raise HTTPException(status_code=404, detail="Policy type does not exist")
+    if policy_instance_id not in policy_instances[policy_type_id]:
+        raise HTTPException(status_code=404, detail="Policy instance does not exist")
+
+    return {"data": policy_instances[policy_type_id][policy_instance_id].data}
+
 
 @app.get("/a1-p/policytypes/{policy_type_id}/policies", response_model=list[str])
 async def list_policy_instances(policy_type_id: int):
