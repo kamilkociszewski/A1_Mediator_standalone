@@ -1,14 +1,18 @@
 {
-  "name": "tsapolicy",
-  "description": "tsa parameters",
-  "policy_type_id": 20008,
+  "name": "es_policy",
+  "description": "Simplified - O-RAN standard Energy saving policy",
+  "policy_type_id": 10000,
   "create_schema": {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-      "threshold": {
+      "cellID": {
         "type": "integer",
         "default": 0
+      },
+      "ES_State": {
+        "type": "bool",
+        "default": false
       }
     },
     "additionalProperties": false

@@ -45,7 +45,7 @@ How to run tests?
 cd A1_Mediator
 pip3 install -r requirements.txt
 cd app
-python3 main.py
+python3 main.py (tested with Python 3.10.13)
 type in browser: (host_ip):9000/docs #to see available APIs
 ```
 
@@ -61,7 +61,40 @@ type in browser: (host_ip):9000/docs #to see available APIs
 ```
 ./build/examples/xApp/c/kpm_rc_A1/xapp_kpm_rc_a1
 ```
-
+## Example Policy Type:
+```json
+{
+  "name": "es_policy",
+  "description": "Simplified - O-RAN standard Energy saving policy",
+  "policy_type_id": 10000,
+  "create_schema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "cellID": {
+        "type": "integer",
+        "default": 0
+      },
+      "ES_State": {
+        "type": "bool",
+        "default": false
+      }
+    },
+    "additionalProperties": false
+  }
+}
+```
+Please note that current version of A1 Mediator supports policies that allows only to dynamically define new fields under predefined "properties" object field.
+Other existing fields can be modified, but policy schema should not be modified, e.g. adding new objects. API will not allow to modify them.
+## Example Policy Instance:
+```json
+{
+  "data": {
+    "cellID": 10,
+    "ES_State": true
+  }
+}
+```
 ## Contributors
 - Jerzy Jegier, Orange Innovation Poland
 - [Kamil Kociszewski](https://www.linkedin.com/in/kociszz/), Orange Innovation Poland, kamil.kociszewski@orange.com
