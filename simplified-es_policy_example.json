@@ -10,7 +10,15 @@
         "type": "integer",
         "default": 0
       },
+      "cellID3": {
+        "type": "integer",
+        "default": 0
+      },
       "ES_State": {
+        "type": "bool",
+        "default": false
+      },
+      "ES_State2": {
         "type": "bool",
         "default": false
       }

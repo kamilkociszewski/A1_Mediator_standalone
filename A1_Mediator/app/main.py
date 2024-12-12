@@ -2,6 +2,10 @@ from typing import Any, Dict, Optional
 from fastapi import FastAPI, HTTPException, Path, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from pathlib import Path as OsPath
+
+import os
+import json, glob
 
 app = FastAPI()
 
@@ -83,7 +87,7 @@ async def create_policy_type(policy_type_id: int = Path(..., gt=0, lt=2147483647
 async def create_policy_instance(
         policy_type_id: int,
         policy_instance_id: str,
-        body: PolicyInstanceSchema = Body(...),
+        body: Dict[str, Any] = Body(...),  # Expecting a flat dictionary
 ):
     # Check if policy type exists
     if policy_type_id not in policy_types:
@@ -93,21 +97,42 @@ async def create_policy_instance(
     policy_type = policy_types[policy_type_id]
     schema_properties = policy_type.create_schema.properties
 
-    # Validate each field in the instance against the schema
-    for field_name, field_value in body.data.items():
+    # Validate instance data against the schema
+    for field_name, field_value in body.items():
         if field_name not in schema_properties:
-            raise HTTPException(status_code=400, detail=f"Field '{field_name}' is not allowed for this policy type")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Field '{field_name}' is not allowed for this policy type. Allowed fields are: {list(schema_properties.keys())}"
+            )
+
         expected_type = schema_properties[field_name]["type"]
         if expected_type == "integer" and not isinstance(field_value, int):
-            raise HTTPException(status_code=400, detail=f"Field '{field_name}' must be an integer")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Field '{field_name}' must be an integer. Provided value: {field_value}"
+            )
         if expected_type == "bool" and not isinstance(field_value, bool):
-            raise HTTPException(status_code=400, detail=f"Field '{field_name}' must be a boolean")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Field '{field_name}' must be a boolean. Provided value: {field_value}"
+            )
+        if expected_type == "string" and not isinstance(field_value, str):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Field '{field_name}' must be a string. Provided value: {field_value}"
+            )
 
-    # Save the instance under the policy type
-    policy_instances[policy_type_id][policy_instance_id] = body
+    # Check for missing required fields
+    for required_field, details in schema_properties.items():
+        if required_field not in body:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing required field '{required_field}'."
+            )
 
-    return body
-
+    # Save the instance under the policy type directly
+    policy_instances[policy_type_id][policy_instance_id] = {"data": body}
+    return {"data": body}
 
 @app.get("/a1-p/policytypes/{policy_type_id}/policies/{policy_instance_id}/status")
 async def get_policy_instance_status(policy_type_id: int, policy_instance_id: str):
@@ -116,8 +141,8 @@ async def get_policy_instance_status(policy_type_id: int, policy_instance_id: st
     if policy_instance_id not in policy_instances[policy_type_id]:
         raise HTTPException(status_code=404, detail="Policy instance does not exist")
 
-    return {"data": policy_instances[policy_type_id][policy_instance_id].data}
-
+    # Return the stored policy instance data directly
+    return policy_instances[policy_type_id][policy_instance_id]
 
 @app.get("/a1-p/policytypes/{policy_type_id}/policies", response_model=list[str])
 async def list_policy_instances(policy_type_id: int):
@@ -147,7 +172,21 @@ async def delete_policy_instance(policy_type_id: int, policy_instance_id: str):
     return {"detail": "Policy instance successfully deleted"}
 
 
+abs_path = os.path.dirname(__file__)
+path = abs_path + "/../policies/"
+
+
+def load_policies():
+    pattern = os.path.join(path, '*.json')
+    for filename in glob.glob(pattern):
+        with open(filename, "r") as outfile:
+            json_object = json.load(outfile)
+            policy_type_id = int(OsPath(filename).stem)
+            policy_types[policy_type_id] = PolicyTypeSchema(**json_object)
+            policy_instances[policy_type_id] = {}
+
+
 if __name__ == "__main__":
     import uvicorn  # Ensure import is included
-
+    load_policies()
     uvicorn.run(app, host="0.0.0.0", port=9000)
